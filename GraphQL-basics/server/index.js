@@ -4,6 +4,9 @@ const { expressMiddleware } = require('@apollo/server/express4')
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { default: axios } = require('axios');
+const {USERS } = require('./user')
+const {TODOS} = require('./todo')
+
 const PORT = 8000;
 async function startServer() {
      const app = express();
@@ -33,12 +36,12 @@ async function startServer() {
           `,
           resolvers: {
                Todo:{
-                    user: async(todo)=>(await axios.get(`https://jsonplaceholder.typicode.com/users/${todo.id}`)).data,
+                    user: async(todo)=> USERS.find((e)=> e.id === todo.id),
                },
                Query: {
-                    getTodos: async () => (await axios.get('https://jsonplaceholder.typicode.com/todos')).data,
-                    getUsers: async () => (await axios.get('https://jsonplaceholder.typicode.com/users')).data,
-                    getUser: async (parent, {id}) => (await axios.get(`https://jsonplaceholder.typicode.com/users/${id}`)).data,
+                    getTodos: async () => TODOS,
+                    getUsers: async () => USERS,
+                    getUser: async (parent, {id}) => USERS.find((e)=> e.id === id),
                },
           },
      });
@@ -54,7 +57,7 @@ async function startServer() {
      await server.start()
 
      app.use('/graphql', expressMiddleware(server));
-     app.listen(PORT, () => console.log(`GraphQl server started at PORT ${PORT}`));
+     app.listen(PORT, () => console.log(`GraphQl server started at PORT http://localhost:${PORT}/graphql`));
 }
 
 startServer();
